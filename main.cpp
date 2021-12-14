@@ -1,10 +1,15 @@
-#include "VkBootstrap.h"
-#include "vk_mem_alloc.h"
+
 
 #include <iostream>
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#define SDL_MAIN_HANDLED
+#include <SDL_events.h>
+#include <SDL.h>
+#include <SDL_vulkan.h>
+
+#define VMA_IMPLEMENTATION
+#include "vk_mem_alloc.h"
+#include "VkBootstrap.h"
 
 int main()
 {
@@ -28,19 +33,25 @@ int main()
 
 
 
+	// We initialize SDL and create a window with it. 
+	SDL_Init(SDL_INIT_VIDEO);
+	SDL_WindowFlags window_flags = (SDL_WINDOW_VULKAN);
 
-    glfwInit();
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-    GLFWwindow* window;
-    window = glfwCreateWindow(1920, 1080, "Vulkan", nullptr, nullptr);
+	SDL_Window* window = SDL_CreateWindow(
+		"",
+		SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_UNDEFINED,
+		1920,
+		1080,
+		window_flags
+	);
 
-    VkResult err = glfwCreateWindowSurface(instance, window, NULL, &surface);
-    if (err != VK_SUCCESS) {
+	SDL_bool err = SDL_Vulkan_CreateSurface(window, vkb_instance.instance, &surface);
+	if (!err) {
         std::cerr << "Failed to create Window." << std::endl;
         return -1;
     }
-    std::cout << "GLFW window initialized.";
+    std::cout << "SDL2 window initialized.";
 
 
 
@@ -105,7 +116,7 @@ int main()
     vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 
 
-    // ---------------- BEGIN INIT SWAPCHAIN ----------
+
 
 	vkb::SwapchainBuilder swapchainBuilder{ physicalDevice, device, surface };
 
@@ -182,54 +193,36 @@ int main()
 
 
 
-	VkSamplerCreateInfo createInfo = {};
-
-	auto reductionMode = VK_SAMPLER_REDUCTION_MODE_MIN;
-
-	createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-	createInfo.magFilter = VK_FILTER_LINEAR;
-	createInfo.minFilter = VK_FILTER_LINEAR;
-	createInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
-	createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	createInfo.minLod = 0;
-	createInfo.maxLod = 16.f;
-
-	VkSamplerReductionModeCreateInfoEXT createInfoReduction = { VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO_EXT };
-
-	if (reductionMode != VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE_EXT)
-	{
-		createInfoReduction.reductionMode = reductionMode;
-
-		createInfo.pNext = &createInfoReduction;
-	}
 
 
-	VK_CHECK(vkCreateSampler(device, &createInfo, 0, &_depthSampler));
+	VkSamplerCreateInfo samplerInfo = {};
+	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	samplerInfo.pNext = nullptr;
 
-	VkSamplerCreateInfo samplerInfo = vkinit::sampler_create_info(VK_FILTER_LINEAR);
+	samplerInfo.magFilter = VK_FILTER_LINEAR;
+	samplerInfo.minFilter = VK_FILTER_LINEAR;
+	samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
-	vkCreateSampler(_device, &samplerInfo, nullptr, &_smoothSampler);
 
-	VkSamplerCreateInfo shadsamplerInfo = vkinit::sampler_create_info(VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER);
-	shadsamplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-	shadsamplerInfo.compareEnable = true;
-	shadsamplerInfo.compareOp = VK_COMPARE_OP_LESS;
-	vkCreateSampler(_device, &shadsamplerInfo, nullptr, &_shadowSampler);
+	VkSampler smoothSampler;
+	vkCreateSampler(device, &samplerInfo, nullptr, &smoothSampler);
 
 
-	//add to deletion queues
-	_mainDeletionQueue.push_function([=]() {
-		vkDestroyImageView(_device, _depthImage._defaultView, nullptr);
-		vmaDestroyImage(_allocator, _depthImage._image, _depthImage._allocation);
-		});
-    // ----------------- END INIT SWAPCHAIN ------------
+	bool bQuit = false;
+	while (!bQuit)
+	{
+		SDL_Event e;
+		while (SDL_PollEvent(&e) != 0)
+		{
+			if (e.type == SDL_QUIT)
+			{
+				bQuit = true;
+			}
+		}
+	}
 
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
-    }
-
-	vkDestroySwapchainKHR(_device, _swapchain, nullptr);
+	vkDestroySwapchainKHR(device, swapchain, nullptr);
 }
