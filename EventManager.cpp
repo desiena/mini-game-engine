@@ -2,6 +2,11 @@
 
 using namespace eventSystem;
 
+uint32_t eventSystem::getEventType(std::string typeName)
+{
+	return std::hash<std::string>{}(typeName);
+}
+
 void EventManager::publish(Event event)
 {
 	std::vector<Subscription> interestedSubscriptions = subscriptions[event.type];
@@ -11,9 +16,7 @@ void EventManager::publish(Event event)
 	}
 }
 
-void EventManager::subscribe(Listener* listener, std::string eventType)
+void EventManager::subscribe(Listener* listener, std::string eventName)
 {
-	uint32_t typeHash = std::hash<std::string>{}(eventType);
-	std::vector<Subscription> eventSubscriptions = subscriptions[typeHash];
-	eventSubscriptions.push_back({listener});
+	subscriptions[getEventType(eventName)].push_back({ listener });
 }

@@ -8,15 +8,14 @@
 namespace eventSystem
 {
 
-	// ToDo: Stricter event type management.
-	class EventManager
+
+	uint32_t getEventType(std::string typeName);
+
+	struct EventArg
 	{
-	public:
-		void publish(Event event);
-		void subscribe(Listener* subscriber, std::string eventType);
-	private:
-		std::unordered_map<uint32_t, std::vector<Subscription>> subscriptions;
-		// ToDo: add a map that allows for the original string to be retrieved using a hash.
+		// Name is a hashed string id.
+		uint32_t key;
+		std::variant<bool, uint64_t> value;
 	};
 
 	struct Event
@@ -27,11 +26,10 @@ namespace eventSystem
 		std::array<EventArg, 5> args;
 	};
 
-	struct EventArg
+	class Listener
 	{
-		// Name is a hashed string id.
-		uint32_t key;
-		std::variant<bool, uint64_t> value;
+	public:
+		virtual void handleEvent(Event) = 0;
 	};
 
 	struct Subscription
@@ -39,10 +37,15 @@ namespace eventSystem
 		Listener* subscriber;
 	};
 
-	class Listener
+	// ToDo: Stricter event type management.
+	class EventManager
 	{
 	public:
-		virtual void handleEvent(Event) = 0;
+		void publish(Event event);
+		void subscribe(Listener* subscriber, std::string eventType);
+	private:
+		std::unordered_map<uint32_t, std::vector<Subscription>> subscriptions;
+		// ToDo: add a map that allows for the original string to be retrieved using a hash.
 	};
 
 }
