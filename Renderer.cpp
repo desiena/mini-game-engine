@@ -1,6 +1,4 @@
-
-
-#include <iostream>
+#include "Renderer.h"
 
 #define SDL_MAIN_HANDLED
 #include <SDL_events.h>
@@ -11,23 +9,25 @@
 #include "vk_mem_alloc.h"
 #include "VkBootstrap.h"
 
-int main()
+#include <iostream>
+
+int Renderer::init()
 {
-    vkb::InstanceBuilder instance_builder;
-    auto instance_builder_return = instance_builder
-        .request_validation_layers()
-        .use_default_debug_messenger()
-        .build();
+	vkb::InstanceBuilder instance_builder;
+	auto instance_builder_return = instance_builder
+		.request_validation_layers()
+		.use_default_debug_messenger()
+		.build();
 
-    if (!instance_builder_return) {
-        std::cerr << "Failed to create Vulkan instance. Error: " << instance_builder_return.error().message() << "\n";
-        return -1;
-    }
-    std::cout << "Vulkan instance initialized.";
+	if (!instance_builder_return) {
+		std::cerr << "Failed to create Vulkan instance. Error: " << instance_builder_return.error().message() << "\n";
+		return -1;
+	}
+	std::cout << "Vulkan instance initialized.";
 
-    vkb::Instance vkb_instance = instance_builder_return.value();
+	vkb::Instance vkb_instance = instance_builder_return.value();
 
-    VkInstance instance = vkb_instance.instance;
+	VkInstance instance = vkb_instance.instance;
 
 
 
@@ -48,72 +48,72 @@ int main()
 
 	SDL_bool err = SDL_Vulkan_CreateSurface(window, vkb_instance.instance, &surface);
 	if (!err) {
-        std::cerr << "Failed to create Window." << std::endl;
-        return -1;
-    }
-    std::cout << "SDL2 window initialized.";
+		std::cerr << "Failed to create Window." << std::endl;
+		return -1;
+	}
+	std::cout << "SDL2 window initialized.";
 
 
 
-    vkb::PhysicalDeviceSelector selector { vkb_instance };
-    VkPhysicalDeviceFeatures feats{};
-    feats.pipelineStatisticsQuery = true;
-    feats.multiDrawIndirect = true;
-    feats.drawIndirectFirstInstance = true;
-    feats.samplerAnisotropy = true;
-    selector.set_required_features(feats);
+	vkb::PhysicalDeviceSelector selector{ vkb_instance };
+	VkPhysicalDeviceFeatures feats{};
+	feats.pipelineStatisticsQuery = true;
+	feats.multiDrawIndirect = true;
+	feats.drawIndirectFirstInstance = true;
+	feats.samplerAnisotropy = true;
+	selector.set_required_features(feats);
 
-    auto selectorReturn = selector
-        .set_minimum_version(1, 1)
-        .set_surface(surface)
-        .add_required_extension(VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME)
-        .select();
-    if (!selectorReturn)
-    {
-        std::cerr << "Failed to select GPU." << std::endl;
-        return -1;
-    }
-    std::cout << "GPU selected.";
-    vkb::PhysicalDevice vkb_physicalDevice = selectorReturn.value();
-
-
-
-
-
-    vkb::DeviceBuilder deviceBuilder{ vkb_physicalDevice };
-    auto deviceReturn = deviceBuilder.build();
-    if (!deviceReturn)
-    {
-        std::cerr << "Failed to build physical device.";
-        return -1;
-    }
-    std::cout << "Built physical device.";
-
-    vkb::Device vkbDevice = deviceReturn.value();
-
-    // Get the VkDevice handle used in the rest of a vulkan application
-    VkDevice device = vkbDevice.device;
-    VkPhysicalDevice physicalDevice = vkb_physicalDevice.physical_device;
-
-    // use vkbootstrap to get a Graphics queue
-    VkQueue graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
-
-    uint32_t graphicsQueueFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+	auto selectorReturn = selector
+		.set_minimum_version(1, 1)
+		.set_surface(surface)
+		.add_required_extension(VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME)
+		.select();
+	if (!selectorReturn)
+	{
+		std::cerr << "Failed to select GPU." << std::endl;
+		return -1;
+	}
+	std::cout << "GPU selected.";
+	vkb::PhysicalDevice vkb_physicalDevice = selectorReturn.value();
 
 
 
 
 
-    //initialize the memory allocator
-    VmaAllocator allocator;
-    VmaAllocatorCreateInfo allocatorInfo = {};
-    allocatorInfo.physicalDevice = physicalDevice;
-    allocatorInfo.device = device;
-    allocatorInfo.instance = instance;
-    vmaCreateAllocator(&allocatorInfo, &allocator);
+	vkb::DeviceBuilder deviceBuilder{ vkb_physicalDevice };
+	auto deviceReturn = deviceBuilder.build();
+	if (!deviceReturn)
+	{
+		std::cerr << "Failed to build physical device.";
+		return -1;
+	}
+	std::cout << "Built physical device.";
 
-    VkPhysicalDeviceProperties physicalDeviceProperties{};
-    vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+	vkb::Device vkbDevice = deviceReturn.value();
+
+	// Get the VkDevice handle used in the rest of a vulkan application
+	device = vkbDevice.device;
+	VkPhysicalDevice physicalDevice = vkb_physicalDevice.physical_device;
+
+	// use vkbootstrap to get a Graphics queue
+	VkQueue graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
+
+	uint32_t graphicsQueueFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+
+
+
+
+
+	//initialize the memory allocator
+	VmaAllocator allocator;
+	VmaAllocatorCreateInfo allocatorInfo = {};
+	allocatorInfo.physicalDevice = physicalDevice;
+	allocatorInfo.device = device;
+	allocatorInfo.instance = instance;
+	vmaCreateAllocator(&allocatorInfo, &allocator);
+
+	VkPhysicalDeviceProperties physicalDeviceProperties{};
+	vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 
 
 
@@ -128,7 +128,7 @@ int main()
 		.value();
 
 	//store swapchain and its related images
-	VkSwapchainKHR swapchain = vkbSwapchain.swapchain;
+	swapchain = vkbSwapchain.swapchain;
 	std::vector<VkImage> swapchainImages = vkbSwapchain.get_images().value();
 	std::vector<VkImageView> swapchainImageViews = vkbSwapchain.get_image_views().value();
 
@@ -210,19 +210,27 @@ int main()
 	VkSampler smoothSampler;
 	vkCreateSampler(device, &samplerInfo, nullptr, &smoothSampler);
 
+}
 
-	bool bQuit = false;
-	while (!bQuit)
+void Renderer::handleEvent(eventSystem::Event event)
+{
+}
+
+bool Renderer::shouldQuit()
+{
+	SDL_Event e;
+	while (SDL_PollEvent(&e) != 0)
 	{
-		SDL_Event e;
-		while (SDL_PollEvent(&e) != 0)
+		if (e.type == SDL_QUIT)
 		{
-			if (e.type == SDL_QUIT)
-			{
-				bQuit = true;
-			}
+			return true;
 		}
 	}
 
+	return false;
+}
+
+void Renderer::cleanUp()
+{
 	vkDestroySwapchainKHR(device, swapchain, nullptr);
 }
