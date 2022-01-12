@@ -117,7 +117,7 @@
       <PreprocessorDefinitions>
       </PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\acede\Documents\Libraries\vma;C:\Users\acede\Documents\Libraries\SDL2-2.0.16\include;C:\VulkanSDK\1.2.189.2\Include;C:\Users\acede\Documents\Libraries\vkbootstrap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\acede\Documents\Libraries\glm;C:\Users\acede\Documents\Libraries\tinyobjloader-master;C:\Users\acede\Documents\Libraries\stb-master;C:\Users\acede\Documents\Libraries\vma;C:\Users\acede\Documents\Libraries\SDL2-2.0.16\include;C:\VulkanSDK\1.2.189.2\Include;C:\Users\acede\Documents\Libraries\vkbootstrap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -136,7 +136,7 @@
       <PreprocessorDefinitions>
       </PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\acede\Documents\Libraries\vma;C:\Users\acede\Documents\Libraries\SDL2-2.0.16\include;C:\VulkanSDK\1.2.189.2\Include;C:\Users\acede\Documents\Libraries\vkbootstrap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\acede\Documents\Libraries\glm;C:\Users\acede\Documents\Libraries\tinyobjloader-master;C:\Users\acede\Documents\Libraries\stb-master;C:\Users\acede\Documents\Libraries\vma;C:\Users\acede\Documents\Libraries\SDL2-2.0.16\include;C:\VulkanSDK\1.2.189.2\Include;C:\Users\acede\Documents\Libraries\vkbootstrap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -156,6 +156,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+    <None Include="shaders\frag.glsl" />
+    <None Include="shaders\vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE.txt" />
