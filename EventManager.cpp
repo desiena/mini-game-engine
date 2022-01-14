@@ -2,10 +2,6 @@
 
 using namespace eventSystem;
 
-uint32_t eventSystem::getEventType(std::string typeName)
-{
-	return std::hash<std::string>{}(typeName);
-}
 
 void EventManager::publish(Event event)
 {

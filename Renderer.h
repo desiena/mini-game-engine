@@ -70,24 +70,23 @@ class Renderer : public eventSystem::Listener
 {
 public:
 	std::vector<Renderable> renderables;
-	int draw_frame();
 
 	vkb::Instance instance;
 	VkSurfaceKHR surface;
 	vkb::Device device;
 	vkb::Swapchain swapchain;
 
-	VkQueue graphics_queue;
-	VkQueue present_queue;
+	VkQueue graphicsQueue;
+	VkQueue presentQueue;
 
-	std::vector<VkImage> swapchain_images;
-	std::vector<VkImageView> swapchain_image_views;
+	std::vector<VkImage> swapchainImages;
+	std::vector<VkImageView> swapchainImageViews;
 	std::vector<VkFramebuffer> framebuffers;
 
-	VkRenderPass render_pass;
+	VkRenderPass renderPass;
 	VkDescriptorSetLayout descriptorSetLayout;
-	VkPipelineLayout pipeline_layout;
-	VkPipeline graphics_pipeline;
+	VkPipelineLayout pipelineLayout;
+	VkPipeline graphicsPipeline;
 
 	VkImage colorImage;
 	VkDeviceMemory colorImageMemory;
@@ -116,29 +115,27 @@ public:
 	VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
 
-	VkCommandPool command_pool;
-	std::vector<VkCommandBuffer> command_buffers;
+	VkCommandPool commandPool;
+	std::vector<VkCommandBuffer> commandBuffers;
 
-	std::vector<VkSemaphore> available_semaphores;
-	std::vector<VkSemaphore> finished_semaphore;
-	std::vector<VkFence> in_flight_fences;
-	std::vector<VkFence> image_in_flight;
+	std::vector<VkSemaphore> availableSemaphores;
+	std::vector<VkSemaphore> finishedSemaphore;
+	std::vector<VkFence> inFlightFences;
+	std::vector<VkFence> imagesInFlight;
 	size_t currentFrame = 0;
 
 	VkSampleCountFlagBits msaaSamples;
 
-
-public:
-	int init();
-	int device_initialization();
-	int create_swapchain();
-	int get_queues();
+	int drawFrame();
+	int deviceInitialization();
+	int createSwapchain();
+	int getQueues();
 	VkFormat findSupportedFormat(
 		const std::vector<VkFormat>& candidates,
 		VkImageTiling tiling,
 		VkFormatFeatureFlags features);
 	VkFormat findDepthFormat();
-	int create_render_pass();
+	int createRenderPass();
 	std::vector<char> readFile(const std::string& filename);
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 	void createDescriptorSetLayout();
@@ -148,28 +145,31 @@ public:
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
-	void createTextureImage();
-	void createTextureImageView();
-	void createTextureSampler();
+	int createTextureImage();
+	int createTextureImageView();
+	int createTextureSampler();
 	void loadModel();
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-	void createVertexBuffer();
-	void createIndexBuffer();
-	void createUniformBuffers();
-	void createDescriptorPool();
-	void createDescriptorSets();
-	int create_graphics_pipeline();
-	int create_framebuffers();
-	int create_command_pool();
+	int createVertexBuffer();
+	int createIndexBuffer();
+	int createUniformBuffers();
+	int createDescriptorPool();
+	int createDescriptorSets();
+	int createGraphicsPipeline();
+	int createFramebuffers();
+	int createCommandPool();
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
-	void createColorResources();
-	void createDepthResources();
-	int create_command_buffers();
-	int create_sync_objects();
-	int recreate_swapchain();
+	int createColorResources();
+	int createDepthResources();
+	int createCommandBuffers();
+	int createSyncObjects();
+	int recreateSwapchain();
 	void updateUniformBuffer(uint32_t currentImage);
+
+public:
+	int init();
 	virtual void handleEvent(eventSystem::Event event) override;
 	bool shouldQuit();
 	void cleanUp();

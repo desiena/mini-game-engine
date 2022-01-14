@@ -1,1 +1,3 @@
-﻿  testProject.vcxproj -> C:\Users\acede\Documents\Visual Studio Projects\mini_engine\x64\Debug\testProject.exe
+﻿  testEvents.cpp
+C:\Users\acede\Documents\Visual Studio Projects\mini_engine\EventManager.h(16,2): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+  testProject.vcxproj -> C:\Users\acede\Documents\Visual Studio Projects\mini_engine\x64\Debug\testProject.exe

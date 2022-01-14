@@ -7,9 +7,18 @@
 
 namespace eventSystem
 {
+	constexpr size_t val_const{ 0xcbf29ce484222325 };
+	constexpr size_t prime_const{ 0x100000001b3 };
 
+	// From https://simoncoenen.com/blog/programming/StaticReflection
+	constexpr uint32_t Hash(const char* const str, const size_t value) noexcept
+	{
+		return (str[0] == '\0') ? value : Hash(&str[1], (value ^ size_t(str[0])) * prime_const);
+	}
 
-	uint32_t getEventType(std::string typeName);
+	constexpr uint32_t getEventType(std::string eventTypeName) {
+		return Hash(eventTypeName.c_str(), eventTypeName.length());
+	};
 
 	struct EventArg
 	{
