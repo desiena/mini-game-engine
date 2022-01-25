@@ -43,28 +43,17 @@ int Renderer::init()
 	if (0 != createColorResources()) return -1;
 	if (0 != createDepthResources()) return -1;
 	if (0 != createFramebuffers()) return -1;
-	std::cout << "fuck";
-	if (0 != createTextureImage()) return -1;
-	std::cout << "fuck";
-	if (0 != createTextureImageView()) return -1;
-	std::cout << "fuck";
-	if (0 != createTextureSampler()) return -1;
-	std::cout << "fuck";
-	loadModel();
-	if (0 != createVertexBuffer()) return -1;
-	std::cout << "fuck";
-	if (0 != createIndexBuffer()) return -1;
-	std::cout << "fuck";
-	if (0 != createUniformBuffers()) return -1;
-	std::cout << "fuck";
+	if (0 != createTextureImage()) return -1;// per-model
+	if (0 != createTextureImageView()) return -1;// per-model
+	if (0 != createTextureSampler()) return -1;// per-model
+	loadModel();// per-model
+	if (0 != createVertexBuffer()) return -1;// per-model
+	if (0 != createIndexBuffer()) return -1;// per-model
+	if (0 != createUniformBuffers()) return -1;// per-model
 	if (0 != createDescriptorPool()) return -1;
-	std::cout << "fuck";
-	if (0 != createDescriptorSets()) return -1;
-	std::cout << "fuck";
+	if (0 != createDescriptorSets()) return -1;// per-model
 	if (0 != createCommandPool()) return -1;
-	std::cout << "fuck";
-	if (0 != createCommandBuffers()) return -1;
-	std::cout << "fuck";
+	if (0 != createCommandBuffers()) return -1;// per-model?
 	if (0 != createSyncObjects()) return -1;
 }
 
@@ -377,6 +366,7 @@ void Renderer::createBuffer(
 	VkBuffer& buffer,
 	VkDeviceMemory& bufferMemory
 ) {
+	// Todo: simplify with VMA
 	VkBufferCreateInfo bufferInfo{};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	bufferInfo.size = size;
@@ -497,6 +487,7 @@ void Renderer::transitionImageLayout(
 }
 
 void Renderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
+	// Todo: simplify with vma
 	VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
 	VkBufferImageCopy region{};

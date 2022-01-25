@@ -156,8 +156,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="shaders\frag.glsl" />
-    <None Include="shaders\vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE.txt" />
