@@ -64,12 +64,31 @@ namespace std {
 struct Renderable
 {
 
+	uint32_t mipLevels;
+	VkImage textureImage;
+	VkDeviceMemory textureImageMemory;
+	VkImageView textureImageView;
+	VkSampler textureSampler;
+
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
+	VkBuffer vertexBuffer;
+	VkDeviceMemory vertexBufferMemory;
+	VkBuffer indexBuffer;
+	VkDeviceMemory indexBufferMemory;
+
+	std::vector<VkDescriptorSet> descriptorSets;
+
+	std::vector<VkBuffer> uniformBuffers;
+	std::vector<VkDeviceMemory> uniformBuffersMemory;
+
+	std::vector<VkCommandBuffer> commandBuffers;
 };
 
 class Renderer : public eventSystem::Listener
 {
 public:
-	std::vector<Renderable> renderables;
+	std::vector<Renderable*> renderables;
 
 	vkb::Instance instance;
 	VkSurfaceKHR surface;
@@ -96,27 +115,9 @@ public:
 	VkDeviceMemory depthImageMemory;
 	VkImageView depthImageView;
 
-	uint32_t mipLevels;
-	VkImage textureImage;
-	VkDeviceMemory textureImageMemory;
-	VkImageView textureImageView;
-	VkSampler textureSampler;
-
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
-	VkBuffer vertexBuffer;
-	VkDeviceMemory vertexBufferMemory;
-	VkBuffer indexBuffer;
-	VkDeviceMemory indexBufferMemory;
-
-	std::vector<VkBuffer> uniformBuffers;
-	std::vector<VkDeviceMemory> uniformBuffersMemory;
-
 	VkDescriptorPool descriptorPool;
-	std::vector<VkDescriptorSet> descriptorSets;
 
 	VkCommandPool commandPool;
-	std::vector<VkCommandBuffer> commandBuffers;
 
 	std::vector<VkSemaphore> availableSemaphores;
 	std::vector<VkSemaphore> finishedSemaphore;
@@ -145,16 +146,16 @@ public:
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
-	int createTextureImage();
-	int createTextureImageView();
-	int createTextureSampler();
-	void loadModel();
+	int createTextureImage(Renderable* r);
+	int createTextureImageView(Renderable* r);
+	int createTextureSampler(Renderable* r);
+	int loadModel();
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-	int createVertexBuffer();
-	int createIndexBuffer();
-	int createUniformBuffers();
+	int createVertexBuffer(Renderable* r);
+	int createIndexBuffer(Renderable* r);
+	int createUniformBuffers(Renderable* r);
 	int createDescriptorPool();
-	int createDescriptorSets();
+	int createDescriptorSets(Renderable* r);
 	int createGraphicsPipeline();
 	int createFramebuffers();
 	int createCommandPool();
@@ -163,10 +164,10 @@ public:
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
 	int createColorResources();
 	int createDepthResources();
-	int createCommandBuffers();
+	int createCommandBuffers(Renderable* r);
 	int createSyncObjects();
 	int recreateSwapchain();
-	void updateUniformBuffer(uint32_t currentImage);
+	void updateUniformBuffer(Renderable* r, uint32_t currentImage);
 
 public:
 	int init();
