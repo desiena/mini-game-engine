@@ -31,9 +31,9 @@ struct UniformBufferObject {
 	alignas(16) glm::mat4 proj;
 };
 
-// ToDo: change to renderable collection
 int Renderer::init()
 {
+
 	if (0 != deviceInitialization()) return -1;
 	if (0 != createSwapchain()) return -1;
 	if (0 != getQueues()) return -1;
@@ -48,6 +48,9 @@ int Renderer::init()
 	if (0 != createCommandPool()) return -1;
 	if (0 != createSyncObjects()) return -1;
 	loadModel();
+	// ToDo: move to camera system.
+	view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	proj = glm::perspective(glm::radians(45.0f), swapchain.extent.width / (float)swapchain.extent.height, 0.1f, 10.0f);
 }
 
 int Renderer::deviceInitialization() {
@@ -1352,7 +1355,7 @@ int Renderer::createSyncObjects() {
 	return 0;
 }
 
-// ToDo: change to renderable collection
+// ToDo: change to support window resizes
 int Renderer::recreateSwapchain() {
 	vkDeviceWaitIdle(device.device);
 
@@ -1372,15 +1375,18 @@ int Renderer::recreateSwapchain() {
 }
 
 void Renderer::updateUniformBuffer(Renderable* r, uint32_t currentImage) {
+	// ToDo: move high res timing to "framestart" event publisher.
 	static auto startTime = std::chrono::high_resolution_clock::now();
-
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
+	// ToDo: move model transform updates somewhere more appropriate.
+	r->modelTransform = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
 	UniformBufferObject ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), swapchain.extent.width / (float)swapchain.extent.height, 0.1f, 10.0f);
+	ubo.model = r->modelTransform;
+	ubo.view = view;
+	ubo.proj = proj;
 	ubo.proj[1][1] *= -1;
 
 	void* data;
@@ -1390,7 +1396,6 @@ void Renderer::updateUniformBuffer(Renderable* r, uint32_t currentImage) {
 }
 
 
-// ToDo: change to renderable collection
 int Renderer::drawFrame() {
 	vkWaitForFences(device.device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 

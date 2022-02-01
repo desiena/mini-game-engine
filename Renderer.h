@@ -63,6 +63,7 @@ namespace std {
 
 struct Renderable
 {
+	glm::mat4 modelTransform;
 
 	uint32_t mipLevels;
 	VkImage textureImage;
@@ -88,6 +89,9 @@ struct Renderable
 class Renderer : public eventSystem::Listener
 {
 public:
+	glm::mat4 view;
+	glm::mat4 proj;
+
 	std::vector<Renderable*> renderables;
 
 	vkb::Instance instance;
