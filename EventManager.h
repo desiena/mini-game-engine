@@ -34,6 +34,8 @@ namespace eventSystem
 		uint32_t type;
 		// args is a fixed size array to keep open the possibility of an event pool allocator.
 		std::array<EventArg, 5> args;
+
+		EventArg getArg(std::string argName);
 	};
 
 	class Listener

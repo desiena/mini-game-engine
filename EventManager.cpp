@@ -16,3 +16,13 @@ void EventManager::subscribe(Listener* listener, std::string eventName)
 {
 	subscriptions[getEventType(eventName)].push_back({ listener });
 }
+
+EventArg eventSystem::Event::getArg(std::string argName)
+{
+	uint32_t argKey = getEventType(argName);
+	for (EventArg arg : args)
+	{
+		if (arg.key == argKey) return arg;
+	}
+	return { argKey };
+}

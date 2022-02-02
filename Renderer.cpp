@@ -1516,16 +1516,7 @@ void Renderer::handleEvent(eventSystem::Event event)
 		break;
 	case eventSystem::getEventType("mainCameraSet"):
 	{
-		uint32_t argKey = eventSystem::getEventType("mainCamera");
-		eventSystem::EventArg camArg;
-		for (eventSystem::EventArg arg : event.args)
-		{
-			if (arg.key == argKey)
-			{
-				camArg = arg;
-				break;
-			}
-		}
+		auto camArg = event.getArg("mainCamera");
 		mainCamera = (Camera*)std::get<void*>(camArg.value);
 		break;
 	}

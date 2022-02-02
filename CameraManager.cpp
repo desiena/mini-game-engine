@@ -24,14 +24,8 @@ void CameraManager::handleEvent(eventSystem::Event event)
 	{
 	case eventSystem::getEventType("swapchainCreated"):
 	{
-		for (eventSystem::EventArg arg : event.args)
-		{
-			if (arg.key == eventSystem::getEventType("aspectRatio"))
-			{
-				mainCamera->setAspectRatio(std::get<float>(arg.value));
-				break;
-			}
-		}
+		auto aspectArg = event.getArg("aspectRatio");
+		mainCamera->setAspectRatio(std::get<float>(aspectArg.value));
 		break;
 	}
 	default:
