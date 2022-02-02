@@ -2,6 +2,7 @@
 #include "EventManager.h"
 
 #include <iostream>
+#include <chrono>
 
 int main()
 {
@@ -19,9 +20,15 @@ int main()
 	if (cameraManager.init(&eventManager) == -1) return -1;
 	if (renderer.init(&eventManager) == -1) return -1;
 
+	auto startTime = std::chrono::high_resolution_clock::now();
 	while (!renderer.shouldQuit())
 	{
-		eventManager.publish({ eventSystem::getEventType("startFrame") });
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+		eventManager.publish({
+			eventSystem::getEventType("startFrame"),
+			{eventSystem::getEventType("deltaTime"), deltaTime}
+		});
 	}
 
 	renderer.cleanUp();

@@ -1375,14 +1375,9 @@ int Renderer::recreateSwapchain() {
 	return 0;
 }
 
-void Renderer::updateUniformBuffer(Renderable* r, uint32_t currentImage) {
-	// ToDo: move high res timing to "framestart" event publisher.
-	static auto startTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
+void Renderer::updateUniformBuffer(float deltaTime, Renderable* r, uint32_t currentImage) {
 	// ToDo: move model transform updates somewhere more appropriate.
-	r->modelTransform = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	r->modelTransform = glm::rotate(glm::mat4(1.0f), deltaTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	UniformBufferObject ubo{};
 	ubo.model = r->modelTransform;
@@ -1403,7 +1398,7 @@ void Renderer::registerSubscriptions(eventSystem::EventManager* em)
 }
 
 
-int Renderer::drawFrame() {
+int Renderer::drawFrame(float deltaTime) {
 	vkWaitForFences(device.device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
 	uint32_t image_index = 0;
@@ -1426,7 +1421,7 @@ int Renderer::drawFrame() {
 	std::vector<VkCommandBuffer> commandBuffers{};
 	for (Renderable* r : renderables)
 	{
-		updateUniformBuffer(r, image_index);
+		updateUniformBuffer(deltaTime, r, image_index);
 		commandBuffers.push_back(r->commandBuffers[image_index]);
 	}
 
@@ -1512,8 +1507,11 @@ void Renderer::handleEvent(eventSystem::Event event)
 	switch (event.type)
 	{
 	case eventSystem::getEventType("startFrame"):
-		drawFrame();
+	{
+		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
+		drawFrame(deltaTime);
 		break;
+	}
 	case eventSystem::getEventType("mainCameraSet"):
 	{
 		auto camArg = event.getArg("mainCamera");

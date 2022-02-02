@@ -133,7 +133,7 @@ public:
 
 	VkSampleCountFlagBits msaaSamples;
 
-	int drawFrame();
+	int drawFrame(float deltaTime);
 	int deviceInitialization();
 	int createSwapchain();
 	int getQueues();
@@ -173,7 +173,7 @@ public:
 	int createCommandBuffers(Renderable* r);
 	int createSyncObjects();
 	int recreateSwapchain();
-	void updateUniformBuffer(Renderable* r, uint32_t currentImage);
+	void updateUniformBuffer(float deltaTime, Renderable* r, uint32_t currentImage);
 	void registerSubscriptions(eventSystem::EventManager* em);
 public:
 	int init(eventSystem::EventManager* em);
