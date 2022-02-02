@@ -31,9 +31,9 @@ struct UniformBufferObject {
 	alignas(16) glm::mat4 proj;
 };
 
-int Renderer::init()
+int Renderer::init(eventSystem::EventManager* em)
 {
-
+	eventManager = em;
 	if (0 != deviceInitialization()) return -1;
 	if (0 != createSwapchain()) return -1;
 	if (0 != getQueues()) return -1;
@@ -48,9 +48,6 @@ int Renderer::init()
 	if (0 != createCommandPool()) return -1;
 	if (0 != createSyncObjects()) return -1;
 	loadModel();
-	// ToDo: move to camera system.
-	view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	proj = glm::perspective(glm::radians(45.0f), swapchain.extent.width / (float)swapchain.extent.height, 0.1f, 10.0f);
 }
 
 int Renderer::deviceInitialization() {
@@ -142,6 +139,10 @@ int Renderer::createSwapchain() {
 	}
 	vkb::destroy_swapchain(swapchain);
 	swapchain = swap_ret.value();
+	eventManager->publish({ 
+		eventSystem::getEventType("swapchainCreated"),
+		{eventSystem::getEventType("aspectRatio"), swapchain.extent.width / (float)swapchain.extent.height}
+	});
 	return 0;
 }
 
@@ -1385,14 +1386,20 @@ void Renderer::updateUniformBuffer(Renderable* r, uint32_t currentImage) {
 
 	UniformBufferObject ubo{};
 	ubo.model = r->modelTransform;
-	ubo.view = view;
-	ubo.proj = proj;
+	ubo.view = mainCamera->view;
+	ubo.proj = mainCamera->proj;
 	ubo.proj[1][1] *= -1;
 
 	void* data;
 	vkMapMemory(device.device, r->uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
 	memcpy(data, &ubo, sizeof(ubo));
 	vkUnmapMemory(device.device, r->uniformBuffersMemory[currentImage]);
+}
+
+void Renderer::registerSubscriptions(eventSystem::EventManager* em)
+{
+	em->subscribe(this, "startFrame");
+	em->subscribe(this, "mainCameraSet");
 }
 
 
@@ -1506,8 +1513,24 @@ void Renderer::handleEvent(eventSystem::Event event)
 	{
 	case eventSystem::getEventType("startFrame"):
 		drawFrame();
+		break;
+	case eventSystem::getEventType("mainCameraSet"):
+	{
+		uint32_t argKey = eventSystem::getEventType("mainCamera");
+		eventSystem::EventArg camArg;
+		for (eventSystem::EventArg arg : event.args)
+		{
+			if (arg.key == argKey)
+			{
+				camArg = arg;
+				break;
+			}
+		}
+		mainCamera = (Camera*)std::get<void*>(camArg.value);
+		break;
+	}
 	default:
-		std::cerr << "unkown event: " << event.type << std::endl;
+		std::cerr << "unkown event heard by Renderer: " << event.type << std::endl;
 		break;
 	}
 }

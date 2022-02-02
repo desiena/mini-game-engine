@@ -17,14 +17,15 @@ namespace eventSystem
 	}
 
 	constexpr uint32_t getEventType(std::string eventTypeName) {
-		return Hash(eventTypeName.c_str(), eventTypeName.length());
+		uint32_t hashedType = Hash(eventTypeName.c_str(), eventTypeName.length());
+		return hashedType;
 	};
 
 	struct EventArg
 	{
-		// Name is a hashed string id.
+		// Key is a hashed string id.
 		uint32_t key;
-		std::variant<bool, uint64_t> value;
+		std::variant<bool, uint64_t, void*, float> value;
 	};
 
 	struct Event

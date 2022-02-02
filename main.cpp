@@ -9,16 +9,19 @@ int main()
 	// Then any module can easily trigger a shutdown rather than relying 
 	// on a hardcoded quit condition.
 
-	eventSystem::EventManager eventManger;
-
+	eventSystem::EventManager eventManager;
 	Renderer renderer;
-	if (renderer.init() == -1) return -1;
+	CameraManager cameraManager;
 
-	eventManger.subscribe(&renderer, "startFrame");
+	renderer.registerSubscriptions(&eventManager);
+	cameraManager.registerSubscriptions(&eventManager);
+
+	if (cameraManager.init(&eventManager) == -1) return -1;
+	if (renderer.init(&eventManager) == -1) return -1;
 
 	while (!renderer.shouldQuit())
 	{
-		eventManger.publish({ eventSystem::getEventType("startFrame") });
+		eventManager.publish({ eventSystem::getEventType("startFrame") });
 	}
 
 	renderer.cleanUp();

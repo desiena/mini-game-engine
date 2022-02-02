@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "EventManager.h"
+#include "CameraManager.h"
 
 #include "VkBootstrap.h"
 
@@ -88,9 +89,10 @@ struct Renderable
 
 class Renderer : public eventSystem::Listener
 {
+	// ToDo: Make members and methods private as appropriate.
 public:
-	glm::mat4 view;
-	glm::mat4 proj;
+	Camera* mainCamera;
+	eventSystem::EventManager* eventManager;
 
 	std::vector<Renderable*> renderables;
 
@@ -172,9 +174,9 @@ public:
 	int createSyncObjects();
 	int recreateSwapchain();
 	void updateUniformBuffer(Renderable* r, uint32_t currentImage);
-
+	void registerSubscriptions(eventSystem::EventManager* em);
 public:
-	int init();
+	int init(eventSystem::EventManager* em);
 	virtual void handleEvent(eventSystem::Event event) override;
 	bool shouldQuit();
 	void cleanUp();
