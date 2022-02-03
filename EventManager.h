@@ -25,7 +25,7 @@ namespace eventSystem
 	{
 		// Key is a hashed string id.
 		uint32_t key;
-		std::variant<bool, uint64_t, void*, float> value;
+		std::variant<bool, uint32_t, void*, float> value;
 	};
 
 	struct Event

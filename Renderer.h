@@ -4,6 +4,7 @@
 #include <vector>
 #include "EventManager.h"
 #include "CameraManager.h"
+#include "SceneManager.h"
 
 #include "VkBootstrap.h"
 
@@ -93,6 +94,7 @@ class Renderer : public eventSystem::Listener
 public:
 	Camera* mainCamera;
 	eventSystem::EventManager* eventManager;
+	SceneManager* sceneManager;
 
 	std::vector<Renderable*> renderables;
 
@@ -152,10 +154,10 @@ public:
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
-	int createTextureImage(Renderable* r);
+	int createTextureImage(Renderable* r, std::string texturePath);
 	int createTextureImageView(Renderable* r);
 	int createTextureSampler(Renderable* r);
-	int loadModel();
+	int loadModel(std::string modelPath, std::string texturePath, glm::mat4 transform);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	int createVertexBuffer(Renderable* r);
 	int createIndexBuffer(Renderable* r);

@@ -1,5 +1,6 @@
 #include "Renderer.h"
 
+
 #define SDL_MAIN_HANDLED
 #include <SDL_events.h>
 #include <SDL.h>
@@ -18,9 +19,6 @@
 #include <tiny_obj_loader.h>
 
 const std::string SHADER_DIRECTORY = "shaders/";
-
-const std::string MODEL_PATH = "models/viking_room.obj";
-const std::string TEXTURE_PATH = "textures/viking_room.png";
 
 #include <iostream>
 
@@ -47,7 +45,6 @@ int Renderer::init(eventSystem::EventManager* em)
 	if (0 != createDescriptorPool()) return -1;
 	if (0 != createCommandPool()) return -1;
 	if (0 != createSyncObjects()) return -1;
-	loadModel();
 }
 
 int Renderer::deviceInitialization() {
@@ -609,9 +606,9 @@ void Renderer::generateMipmaps(
 	endSingleTimeCommands(commandBuffer);
 }
 
-int Renderer::createTextureImage(Renderable* r) {
+int Renderer::createTextureImage(Renderable* r, std::string texturePath) {
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 	r->mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
@@ -702,20 +699,20 @@ int Renderer::createTextureSampler(Renderable* r) {
 	return 0;
 }
 
-int Renderer::loadModel() {
+int Renderer::loadModel(std::string modelPath, std::string texturePath, glm::mat4 transform) {
 
 	Renderable* r = new Renderable;
 	renderables.push_back(r);
-	if (0 != createTextureImage(r)) return -1;// per-model
-	if (0 != createTextureImageView(r)) return -1;// per-model
-	if (0 != createTextureSampler(r)) return -1;// per-model
+	if (0 != createTextureImage(r, texturePath)) return -1;
+	if (0 != createTextureImageView(r)) return -1;
+	if (0 != createTextureSampler(r)) return -1;
 
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string warn, err;
 
-	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
+	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str())) {
 		throw std::runtime_error(warn + err);
 	}
 
@@ -1395,6 +1392,7 @@ void Renderer::registerSubscriptions(eventSystem::EventManager* em)
 {
 	em->subscribe(this, "startFrame");
 	em->subscribe(this, "mainCameraSet");
+	em->subscribe(this, "gameObjectIntroduced");
 }
 
 
@@ -1517,6 +1515,16 @@ void Renderer::handleEvent(eventSystem::Event event)
 		auto camArg = event.getArg("mainCamera");
 		mainCamera = (Camera*)std::get<void*>(camArg.value);
 		break;
+	}
+	case eventSystem::getEventType("gameObjectIntroduced"):
+	{
+		auto objIDArg = event.getArg("objectID");
+		uint32_t objID = std::get<uint32_t>(objIDArg.value);
+		SceneObject obj = sceneManager->getObjectByID(objID);
+		// ToDo: clean this up. SceneObject.getDataField?
+		std::string modelPath = std::get<std::string>(obj.serializationData[eventSystem::getEventType("modelPath")]);
+		std::string texturePath = std::get<std::string>(obj.serializationData[eventSystem::getEventType("texturePath")]);
+		loadModel(modelPath, texturePath, obj.transform);
 	}
 	default:
 		std::cerr << "unkown event heard by Renderer: " << event.type << std::endl;
