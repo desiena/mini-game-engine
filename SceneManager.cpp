@@ -3,11 +3,31 @@
 int SceneManager::init(eventSystem::EventManager* em)
 {
     eventManager = em;
-    // ToDo: load yaml and add data to event.
-    eventManager->publish({
-        eventSystem::getEventType("gameObjectIntroduced"),
-        {{eventSystem::getEventType("objectID"), eventSystem::getEventType("vikingRoom")}}
-        });
+
+    // ToDo: add validation
+    SceneObject so{};
+
+    nlohmann::json sceneJSON;
+    std::ifstream i("scenes/scene.json");
+    i >> sceneJSON;
+
+    for (auto& obj : sceneJSON)
+    {
+        so.name = obj["name"].get<std::string>();
+        so.hashedName = eventSystem::getEventType(so.name);
+        so.transform = extractTransform(obj);
+        for (auto& [key, value] : obj["data"].items())
+        {
+            so.serializationData[eventSystem::getEventType(key)] = value;
+        }
+
+        sceneObjects[so.hashedName] = so;
+
+        eventManager->publish({
+            eventSystem::getEventType("gameObjectIntroduced"),
+            {{eventSystem::getEventType("objectID"), so.hashedName}}
+            });
+    }
     return 0;
 }
 
@@ -17,17 +37,40 @@ void SceneManager::registerSubscriptions(eventSystem::EventManager* em)
 
 SceneObject SceneManager::getObjectByID(uint32_t objID)
 {
-    return {
-        "vikingRoom",
-        eventSystem::getEventType("vikingRoom"),
-        glm::mat4(1.0f),
-        {
-            {eventSystem::getEventType("modelPath"), "models/viking_room.obj"},
-            {eventSystem::getEventType("texturePath"), "textures/viking_room.png"},
-        }
-    };
+    return sceneObjects[objID];
 }
 
 void SceneManager::handleEvent(eventSystem::Event event)
 {
+}
+
+glm::mat4 SceneManager::extractTransform(nlohmann::json obj)
+{
+    // ToDo: Move to srt representation for better readability.
+    // ToDo: verify row major ordering
+    glm::vec4 row0 = {
+        obj["transform"][0][0],
+        obj["transform"][0][1],
+        obj["transform"][0][2],
+        obj["transform"][0][3],
+    };
+    glm::vec4 row1 = {
+        obj["transform"][1][0],
+        obj["transform"][1][1],
+        obj["transform"][1][2],
+        obj["transform"][1][3],
+    };
+    glm::vec4 row2 = {
+        obj["transform"][2][0],
+        obj["transform"][2][1],
+        obj["transform"][2][2],
+        obj["transform"][2][3],
+    };
+    glm::vec4 row3 = {
+        obj["transform"][3][0],
+        obj["transform"][3][1],
+        obj["transform"][3][2],
+        obj["transform"][3][3],
+    };
+    return glm::mat4{row0, row1, row2, row3};
 }

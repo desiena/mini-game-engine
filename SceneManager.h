@@ -3,10 +3,13 @@
 
 #include <vector>
 #include <unordered_map>
+#include <fstream>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/hash.hpp>
+
+#include <nlohmann/json.hpp>
 
 struct SceneObject
 {
@@ -24,7 +27,9 @@ public:
 	SceneObject getObjectByID(uint32_t objID);
 private:
 	eventSystem::EventManager* eventManager;
+	std::unordered_map<uint32_t, SceneObject> sceneObjects;
 
 	virtual void handleEvent(eventSystem::Event event) override;
+	glm::mat4 extractTransform(nlohmann::json obj);
 };
 

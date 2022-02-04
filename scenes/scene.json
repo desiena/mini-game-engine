@@ -1,0 +1,15 @@
+[
+  {
+    "name": "vikingRoom1",
+    "transform": [
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [1, 1, 1, 1]
+    ],
+    "data": {
+      "modelPath": "models/viking_room.obj",
+      "texturePath": "textures/viking_room.png"
+    }
+  }
+]
