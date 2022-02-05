@@ -2,10 +2,23 @@
   {
     "name": "vikingRoom1",
     "transform": [
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-      [1, 1, 1, 1]
+      [ 1, 0, 0, 0 ],
+      [ 0, 1, 0, 0 ],
+      [ 0, 0, 1, 0 ],
+      [ 0, 1, 0, 1 ]
+    ],
+    "data": {
+      "modelPath": "models/viking_room.obj",
+      "texturePath": "textures/viking_room.png"
+    }
+  },
+  {
+    "name": "vikingRoom2",
+    "transform": [
+      [ 1, 0, 0, 0 ],
+      [ 0, 1, 0, 0 ],
+      [ 0, 0, 1, 0 ],
+      [ 0, 0, 0, 1 ]
     ],
     "data": {
       "modelPath": "models/viking_room.obj",

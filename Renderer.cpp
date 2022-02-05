@@ -44,6 +44,7 @@ int Renderer::init(eventSystem::EventManager* em)
 	if (0 != createFramebuffers()) return -1;
 	if (0 != createDescriptorPool()) return -1;
 	if (0 != createCommandPool()) return -1;
+	if (0 != createCommandBuffers()) return -1;
 	if (0 != createSyncObjects()) return -1;
 }
 
@@ -706,6 +707,7 @@ int Renderer::loadModel(std::string modelPath, std::string texturePath, glm::mat
 	if (0 != createTextureImage(r, texturePath)) return -1;
 	if (0 != createTextureImageView(r)) return -1;
 	if (0 != createTextureSampler(r)) return -1;
+	r->modelTransform = transform;
 
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
@@ -747,7 +749,6 @@ int Renderer::loadModel(std::string modelPath, std::string texturePath, glm::mat
 	if (0 != createIndexBuffer(r)) return -1;// per-model
 	if (0 != createUniformBuffers(r)) return -1;// per-model
 	if (0 != createDescriptorSets(r)) return -1;// per-model
-	if (0 != createCommandBuffers(r)) return -1;// per-model
 }
 
 void Renderer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
@@ -854,15 +855,15 @@ int Renderer::createUniformBuffers(Renderable* r) {
 int Renderer::createDescriptorPool() {
 	std::array<VkDescriptorPoolSize, 2> poolSizes{};
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	poolSizes[0].descriptorCount = static_cast<uint32_t>(swapchainImages.size());
+	poolSizes[0].descriptorCount = static_cast<uint32_t>(swapchainImages.size()*2);
 	poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	poolSizes[1].descriptorCount = static_cast<uint32_t>(swapchainImages.size());
+	poolSizes[1].descriptorCount = static_cast<uint32_t>(swapchainImages.size()*2);
 
 	VkDescriptorPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 	poolInfo.pPoolSizes = poolSizes.data();
-	poolInfo.maxSets = static_cast<uint32_t>(swapchainImages.size());
+	poolInfo.maxSets = static_cast<uint32_t>(swapchainImages.size()*2);
 
 	if (vkCreateDescriptorPool(device.device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create descriptor pool!");
@@ -1119,6 +1120,99 @@ int Renderer::createCommandPool() {
 	return 0;
 }
 
+int Renderer::createCommandBuffers()
+{
+	commandBuffers.resize(framebuffers.size());
+
+	VkCommandBufferAllocateInfo allocInfo = {};
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = commandPool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
+
+	if (vkAllocateCommandBuffers(device.device, &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+		return -1; // failed to allocate command buffers;
+	}
+}
+
+int Renderer::updateCommandBuffers()
+{
+	vkResetCommandPool(device.device, commandPool, 0);
+	for (size_t i = 0; i < commandBuffers.size(); i++) {
+		VkCommandBufferBeginInfo begin_info = {};
+		begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		if (vkBeginCommandBuffer(commandBuffers[i], &begin_info) != VK_SUCCESS) {
+			return -1; // failed to begin recording command buffer
+		}
+
+		VkRenderPassBeginInfo render_pass_info = {};
+		render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		render_pass_info.renderPass = renderPass;
+		render_pass_info.framebuffer = framebuffers[i];
+		render_pass_info.renderArea.offset = { 0, 0 };
+		render_pass_info.renderArea.extent = swapchain.extent;
+
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+		clearValues[1].depthStencil = { 1.0f, 0 };
+
+		render_pass_info.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		render_pass_info.pClearValues = clearValues.data();
+
+		VkViewport viewport = {};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = (float)swapchain.extent.width;
+		viewport.height = (float)swapchain.extent.height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+
+		VkRect2D scissor = {};
+		scissor.offset = { 0, 0 };
+		scissor.extent = swapchain.extent;
+
+		vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
+		vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
+
+		vkCmdBeginRenderPass(
+			commandBuffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
+
+		vkCmdBindPipeline(
+			commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+		for (Renderable* r : renderables)
+		{
+			VkBuffer vertexBuffers[] = { r->vertexBuffer };
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
+
+			vkCmdBindIndexBuffer(commandBuffers[i], r->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+			vkCmdBindDescriptorSets(
+				commandBuffers[i],
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				pipelineLayout,
+				0,
+				1,
+				&r->descriptorSets[i],
+				0,
+				nullptr
+			);
+
+			vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(r->indices.size()), 1, 0, 0, 0);
+		}
+
+		vkCmdEndRenderPass(commandBuffers[i]);
+
+		if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+			std::cout << "failed to record command buffer\n";
+			return -1; // failed to record command buffer!
+		}
+	}
+	return 0;
+}
+
 uint32_t Renderer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
 	VkPhysicalDeviceMemoryProperties memProperties;
 	vkGetPhysicalDeviceMemoryProperties(device.physical_device.physical_device, &memProperties);
@@ -1244,91 +1338,6 @@ int Renderer::createDepthResources() {
 	return 0;
 }
 
-int Renderer::createCommandBuffers(Renderable* r) {
-	r->commandBuffers.resize(framebuffers.size());
-
-	VkCommandBufferAllocateInfo allocInfo = {};
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.commandPool = commandPool;
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = (uint32_t)r->commandBuffers.size();
-
-	if (vkAllocateCommandBuffers(device.device, &allocInfo, r->commandBuffers.data()) != VK_SUCCESS) {
-		return -1; // failed to allocate command buffers;
-	}
-
-	for (size_t i = 0; i < r->commandBuffers.size(); i++) {
-		VkCommandBufferBeginInfo begin_info = {};
-		begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-		if (vkBeginCommandBuffer(r->commandBuffers[i], &begin_info) != VK_SUCCESS) {
-			return -1; // failed to begin recording command buffer
-		}
-
-		VkRenderPassBeginInfo render_pass_info = {};
-		render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		render_pass_info.renderPass = renderPass;
-		render_pass_info.framebuffer = framebuffers[i];
-		render_pass_info.renderArea.offset = { 0, 0 };
-		render_pass_info.renderArea.extent = swapchain.extent;
-
-		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
-		clearValues[1].depthStencil = { 1.0f, 0 };
-
-		render_pass_info.clearValueCount = static_cast<uint32_t>(clearValues.size());
-		render_pass_info.pClearValues = clearValues.data();
-
-		VkViewport viewport = {};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = (float)swapchain.extent.width;
-		viewport.height = (float)swapchain.extent.height;
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-
-		VkRect2D scissor = {};
-		scissor.offset = { 0, 0 };
-		scissor.extent = swapchain.extent;
-
-		vkCmdSetViewport(r->commandBuffers[i], 0, 1, &viewport);
-		vkCmdSetScissor(r->commandBuffers[i], 0, 1, &scissor);
-
-		vkCmdBeginRenderPass(
-			r->commandBuffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
-
-		vkCmdBindPipeline(
-			r->commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-
-		VkBuffer vertexBuffers[] = {r->vertexBuffer };
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(r->commandBuffers[i], 0, 1, vertexBuffers, offsets);
-
-		vkCmdBindIndexBuffer(r->commandBuffers[i], r->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-		vkCmdBindDescriptorSets(
-			r->commandBuffers[i],
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pipelineLayout,
-			0,
-			1,
-			&r->descriptorSets[i],
-			0,
-			nullptr
-		);
-
-		vkCmdDrawIndexed(r->commandBuffers[i], static_cast<uint32_t>(r->indices.size()), 1, 0, 0, 0);
-
-		vkCmdEndRenderPass(r->commandBuffers[i]);
-
-		if (vkEndCommandBuffer(r->commandBuffers[i]) != VK_SUCCESS) {
-			std::cout << "failed to record command buffer\n";
-			return -1; // failed to record command buffer!
-		}
-	}
-	return 0;
-}
-
 int Renderer::createSyncObjects() {
 	availableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 	finishedSemaphore.resize(MAX_FRAMES_IN_FLIGHT);
@@ -1374,7 +1383,7 @@ int Renderer::recreateSwapchain() {
 
 void Renderer::updateUniformBuffer(float deltaTime, Renderable* r, uint32_t currentImage) {
 	// ToDo: move model transform updates somewhere more appropriate.
-	r->modelTransform = glm::rotate(glm::mat4(1.0f), deltaTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	//r->modelTransform = glm::rotate(glm::mat4(1.0f), deltaTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	UniformBufferObject ubo{};
 	ubo.model = r->modelTransform;
@@ -1416,11 +1425,9 @@ int Renderer::drawFrame(float deltaTime) {
 		return -1;
 	}
 
-	std::vector<VkCommandBuffer> commandBuffers{};
 	for (Renderable* r : renderables)
 	{
 		updateUniformBuffer(deltaTime, r, image_index);
-		commandBuffers.push_back(r->commandBuffers[image_index]);
 	}
 
 	if (imagesInFlight[image_index] != VK_NULL_HANDLE) {
@@ -1437,8 +1444,8 @@ int Renderer::drawFrame(float deltaTime) {
 	submitInfo.pWaitSemaphores = wait_semaphores;
 	submitInfo.pWaitDstStageMask = wait_stages;
 
-	submitInfo.commandBufferCount = renderables.size();
-	submitInfo.pCommandBuffers = commandBuffers.data();
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &commandBuffers[image_index];
 
 	VkSemaphore signal_semaphores[] = { finishedSemaphore[currentFrame] };
 	submitInfo.signalSemaphoreCount = 1;
@@ -1525,6 +1532,8 @@ void Renderer::handleEvent(eventSystem::Event event)
 		std::string modelPath = std::get<std::string>(obj.serializationData[eventSystem::getEventType("modelPath")]);
 		std::string texturePath = std::get<std::string>(obj.serializationData[eventSystem::getEventType("texturePath")]);
 		loadModel(modelPath, texturePath, obj.transform);
+		updateCommandBuffers();
+		break;
 	}
 	default:
 		std::cerr << "unkown event heard by Renderer: " << event.type << std::endl;

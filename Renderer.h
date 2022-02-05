@@ -84,8 +84,6 @@ struct Renderable
 
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
-
-	std::vector<VkCommandBuffer> commandBuffers;
 };
 
 class Renderer : public eventSystem::Listener
@@ -105,6 +103,8 @@ public:
 
 	VkQueue graphicsQueue;
 	VkQueue presentQueue;
+
+	std::vector<VkCommandBuffer> commandBuffers;
 
 	std::vector<VkImage> swapchainImages;
 	std::vector<VkImageView> swapchainImageViews;
@@ -167,12 +167,13 @@ public:
 	int createGraphicsPipeline();
 	int createFramebuffers();
 	int createCommandPool();
+	int createCommandBuffers();
+	int updateCommandBuffers();
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
 	int createColorResources();
 	int createDepthResources();
-	int createCommandBuffers(Renderable* r);
 	int createSyncObjects();
 	int recreateSwapchain();
 	void updateUniformBuffer(float deltaTime, Renderable* r, uint32_t currentImage);
