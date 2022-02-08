@@ -1,5 +1,6 @@
 #pragma once
 #include "EventManager.h"
+#include "SceneManager.h"
 
 #include <vector>
 
@@ -13,15 +14,18 @@ class Camera
 public:
 	glm::mat4 view;
 	glm::mat4 proj;
-	void setAspectRatio(float aspectRatio);
 };
 
 class CameraManager : public eventSystem::Listener
 {
 public:
+	SceneManager* sceneManager;
+
 	int init(eventSystem::EventManager* em);
 	void registerSubscriptions(eventSystem::EventManager* em);
+	void setAspectRatio(float aspectRatio);
 private:
+	float aspectRatio;
 	Camera* mainCamera;
 	eventSystem::EventManager* em;
 

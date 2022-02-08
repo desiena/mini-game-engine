@@ -23,7 +23,7 @@ int SceneManager::init(eventSystem::EventManager* em)
                 so.sceneData[eventSystem::getEventType(component)][eventSystem::getEventType(key)] = value;
             }
         }
-        auto test = so.sceneData[eventSystem::getEventType("renderable")][eventSystem::getEventType("modelPath")];
+
         sceneObjects[so.hashedName] = so;
 
         for (auto& [component, data] : obj["componentData"].items())

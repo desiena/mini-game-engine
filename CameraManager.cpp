@@ -6,16 +6,18 @@ int CameraManager::init(eventSystem::EventManager* em)
 {
     this->em = em;
 	mainCamera = new Camera{};
-	uint32_t argKey = eventSystem::getEventType("mainCamera");
-	em->publish({
-		eventSystem::getEventType("mainCameraSet"), {argKey, {mainCamera}}
-	});
     return 0;
 }
 
 void CameraManager::registerSubscriptions(eventSystem::EventManager* em)
 {
 	em->subscribe(this, "swapchainCreated");
+	em->subscribe(this, "componentAdded:camera");
+}
+
+void CameraManager::setAspectRatio(float aspectRatio)
+{
+	this->aspectRatio = aspectRatio;
 }
 
 void CameraManager::handleEvent(eventSystem::Event event)
@@ -25,17 +27,26 @@ void CameraManager::handleEvent(eventSystem::Event event)
 	case eventSystem::getEventType("swapchainCreated"):
 	{
 		auto aspectArg = event.getArg("aspectRatio");
-		mainCamera->setAspectRatio(std::get<float>(aspectArg.value));
+		setAspectRatio(std::get<float>(aspectArg.value));
+		break;
+	}
+	case eventSystem::getEventType("componentAdded:camera"):
+	{
+		auto objIDArg = event.getArg("objectID");
+		uint32_t objID = std::get<uint32_t>(objIDArg.value);
+		SceneObject obj = sceneManager->getObjectByID(objID);
+
+		mainCamera->view = obj.transform;
+		mainCamera->proj = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 10.0f);
+
+		uint32_t argKey = eventSystem::getEventType("mainCamera");
+		em->publish({
+			eventSystem::getEventType("mainCameraSet"), {argKey, {mainCamera}}
+			});
 		break;
 	}
 	default:
 		std::cerr << "unkown event heard by camera manager: " << event.type << std::endl;
 		break;
 	}
-}
-
-void Camera::setAspectRatio(float aspectRatio)
-{
-	view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	proj = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 10.0f);
 }

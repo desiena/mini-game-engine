@@ -18,6 +18,7 @@ int main()
 
 	// Todo: add system lookup via game manager to avoid this
 	renderer.sceneManager = &sceneManager;
+	cameraManager.sceneManager = &sceneManager;
 
 	renderer.registerSubscriptions(&eventManager);
 	cameraManager.registerSubscriptions(&eventManager);
