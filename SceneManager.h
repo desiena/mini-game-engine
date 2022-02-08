@@ -13,10 +13,16 @@
 
 struct SceneObject
 {
+public:
 	std::string name;
 	uint32_t hashedName;
 	glm::mat4 transform;
-	std::unordered_map<uint32_t, std::variant<bool, uint64_t, uint32_t, std::string, float>> serializationData;
+	std::unordered_map<
+		uint32_t,
+		std::unordered_map<uint32_t, std::variant<bool, uint64_t, uint32_t, std::string, float>>
+	> sceneData;
+
+	std::unordered_map<uint32_t, std::variant<bool, uint64_t, uint32_t, std::string, float>> getComponentData(std::string componentName);
 };
 
 class SceneManager : public eventSystem::Listener

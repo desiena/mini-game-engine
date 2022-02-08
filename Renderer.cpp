@@ -1401,7 +1401,7 @@ void Renderer::registerSubscriptions(eventSystem::EventManager* em)
 {
 	em->subscribe(this, "startFrame");
 	em->subscribe(this, "mainCameraSet");
-	em->subscribe(this, "gameObjectIntroduced");
+	em->subscribe(this, "componentAdded:renderable");
 }
 
 
@@ -1523,14 +1523,15 @@ void Renderer::handleEvent(eventSystem::Event event)
 		mainCamera = (Camera*)std::get<void*>(camArg.value);
 		break;
 	}
-	case eventSystem::getEventType("gameObjectIntroduced"):
+	case eventSystem::getEventType("componentAdded:renderable"):
 	{
 		auto objIDArg = event.getArg("objectID");
 		uint32_t objID = std::get<uint32_t>(objIDArg.value);
 		SceneObject obj = sceneManager->getObjectByID(objID);
 		// ToDo: clean this up. SceneObject.getDataField?
-		std::string modelPath = std::get<std::string>(obj.serializationData[eventSystem::getEventType("modelPath")]);
-		std::string texturePath = std::get<std::string>(obj.serializationData[eventSystem::getEventType("texturePath")]);
+		auto renderableData = obj.getComponentData("renderable");
+		std::string modelPath = std::get<std::string>(renderableData[eventSystem::getEventType("modelPath")]);
+		std::string texturePath = std::get<std::string>(renderableData[eventSystem::getEventType("texturePath")]);
 		loadModel(modelPath, texturePath, obj.transform);
 		updateCommandBuffers();
 		break;

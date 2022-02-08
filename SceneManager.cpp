@@ -16,17 +16,23 @@ int SceneManager::init(eventSystem::EventManager* em)
         so.name = obj["name"].get<std::string>();
         so.hashedName = eventSystem::getEventType(so.name);
         so.transform = extractTransform(obj);
-        for (auto& [key, value] : obj["data"].items())
+        for (auto& [component, data] : obj["componentData"].items())
         {
-            so.serializationData[eventSystem::getEventType(key)] = value;
+            for (auto& [key, value] : data.items())
+            {
+                so.sceneData[eventSystem::getEventType(component)][eventSystem::getEventType(key)] = value;
+            }
         }
-
+        auto test = so.sceneData[eventSystem::getEventType("renderable")][eventSystem::getEventType("modelPath")];
         sceneObjects[so.hashedName] = so;
 
-        eventManager->publish({
-            eventSystem::getEventType("gameObjectIntroduced"),
-            {{eventSystem::getEventType("objectID"), so.hashedName}}
-            });
+        for (auto& [component, data] : obj["componentData"].items())
+        {
+            eventManager->publish({
+                eventSystem::getEventType("componentAdded:" + component),
+                {{eventSystem::getEventType("objectID"), so.hashedName}}
+                });
+        }
     }
     return 0;
 }
@@ -73,4 +79,9 @@ glm::mat4 SceneManager::extractTransform(nlohmann::json obj)
         obj["transform"][3][3],
     };
     return glm::mat4{row0, row1, row2, row3};
+}
+
+std::unordered_map<uint32_t, std::variant<bool, uint64_t, uint32_t, std::string, float>> SceneObject::getComponentData(std::string componentName)
+{
+    return sceneData[eventSystem::getEventType(componentName)];
 }

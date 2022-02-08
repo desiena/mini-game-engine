@@ -5,11 +5,13 @@
       [ 1, 0, 0, 0 ],
       [ 0, 1, 0, 0 ],
       [ 0, 0, 1, 0 ],
-      [ 0, 1, 0, 1 ]
+      [ 0, 1.2, 0.3, 1 ]
     ],
-    "data": {
-      "modelPath": "models/viking_room.obj",
-      "texturePath": "textures/viking_room.png"
+    "componentData": {
+      "renderable": {
+        "modelPath": "models/viking_room.obj",
+        "texturePath": "textures/viking_room.png"
+      }
     }
   },
   {
@@ -20,9 +22,11 @@
       [ 0, 0, 1, 0 ],
       [ 0, 0, 0, 1 ]
     ],
-    "data": {
-      "modelPath": "models/viking_room.obj",
-      "texturePath": "textures/viking_room.png"
+    "componentData": {
+      "renderable": {
+        "modelPath": "models/viking_room.obj",
+        "texturePath": "textures/viking_room.png"
+      }
     }
   }
 ]
