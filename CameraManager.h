@@ -6,6 +6,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/hash.hpp>
 
 
@@ -14,6 +15,8 @@ class Camera
 public:
 	glm::mat4 view;
 	glm::mat4 proj;
+
+	void update(float deltaTime);
 };
 
 class CameraManager : public eventSystem::Listener

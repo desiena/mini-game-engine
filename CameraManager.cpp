@@ -13,6 +13,7 @@ void CameraManager::registerSubscriptions(eventSystem::EventManager* em)
 {
 	em->subscribe(this, "swapchainCreated");
 	em->subscribe(this, "componentAdded:camera");
+	em->subscribe(this, "startFrame");
 }
 
 void CameraManager::setAspectRatio(float aspectRatio)
@@ -45,8 +46,20 @@ void CameraManager::handleEvent(eventSystem::Event event)
 			});
 		break;
 	}
+	case eventSystem::getEventType("startFrame"):
+	{
+		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
+		mainCamera->update(deltaTime);
+		break;
+	}
 	default:
 		std::cerr << "unkown event heard by camera manager: " << event.type << std::endl;
 		break;
 	}
+}
+
+void Camera::update(float deltaTime)
+{
+	glm::quat facing = glm::quat_cast(view);
+	view = glm::translate(view, glm::vec3( 0, 0, deltaTime * 0.000001f) * facing);
 }
