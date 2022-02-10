@@ -17,6 +17,10 @@ public:
 	glm::mat4 proj;
 
 	void update(float deltaTime);
+	void moveForward(float deltaTime);
+	void moveBack(float deltaTime);
+	void moveLeft(float deltaTime);
+	void moveRight(float deltaTime);
 };
 
 class CameraManager : public eventSystem::Listener

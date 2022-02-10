@@ -1537,21 +1537,7 @@ void Renderer::handleEvent(eventSystem::Event event)
 		break;
 	}
 	default:
-		std::cerr << "unkown event heard by Renderer: " << event.type << std::endl;
+		std::cerr << "unknown event heard by Renderer: " << event.type << std::endl;
 		break;
 	}
-}
-
-bool Renderer::shouldQuit()
-{
-	SDL_Event e;
-	while (SDL_PollEvent(&e) != 0)
-	{
-		if (e.type == SDL_QUIT)
-		{
-			return true;
-		}
-	}
-
-	return false;
 }

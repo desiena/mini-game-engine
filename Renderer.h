@@ -181,8 +181,6 @@ public:
 public:
 	int init(eventSystem::EventManager* em);
 	virtual void handleEvent(eventSystem::Event event) override;
-	bool shouldQuit();
 	void cleanUp();
-
 };
 

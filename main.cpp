@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "EventManager.h"
 #include "SceneManager.h"
+#include "InputManager.h"
 
 #include <iostream>
 #include <chrono>
@@ -15,6 +16,7 @@ int main()
 	Renderer renderer;
 	CameraManager cameraManager;
 	SceneManager sceneManager;
+	InputManager inputManager;
 
 	// Todo: add system lookup via game manager to avoid this
 	renderer.sceneManager = &sceneManager;
@@ -22,16 +24,20 @@ int main()
 
 	renderer.registerSubscriptions(&eventManager);
 	cameraManager.registerSubscriptions(&eventManager);
+	inputManager.registerSubscriptions(&eventManager);
 
 	if (cameraManager.init(&eventManager) == -1) return -1;
 	if (renderer.init(&eventManager) == -1) return -1;
 	if (sceneManager.init(&eventManager) == -1) return -1;
+	if (inputManager.init(&eventManager) == -1) return -1;
 
 	auto startTime = std::chrono::high_resolution_clock::now();
-	while (!renderer.shouldQuit())
+	auto lastTime = startTime;
+	while (!inputManager.shouldQuit())
 	{
 		auto currentTime = std::chrono::high_resolution_clock::now();
-		float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+		float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
+		lastTime = currentTime;
 		eventManager.publish({
 			eventSystem::getEventType("startFrame"),
 			{eventSystem::getEventType("deltaTime"), deltaTime}
