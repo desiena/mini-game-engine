@@ -72,7 +72,7 @@ int Renderer::deviceInitialization() {
 
 	// We initialize SDL and create a window with it. 
 	SDL_Init(SDL_INIT_VIDEO);
-	SDL_WindowFlags window_flags = (SDL_WINDOW_VULKAN);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	SDL_Window* window = SDL_CreateWindow(
 		"",
@@ -80,7 +80,7 @@ int Renderer::deviceInitialization() {
 		SDL_WINDOWPOS_UNDEFINED,
 		1920,
 		1080,
-		window_flags
+		SDL_WINDOW_VULKAN
 	);
 
 	VkSurfaceKHR surface = nullptr;

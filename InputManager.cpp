@@ -58,6 +58,21 @@ void InputManager::handleEvent(eventSystem::Event event)
 				}
 				break;
 
+			case SDL_MOUSEMOTION:
+			{
+				uint32_t mouseX = sdlEvent.motion.xrel;
+				uint32_t mouseY = sdlEvent.motion.yrel;
+				std::array<eventSystem::EventArg, 5> mouseEventArgs{
+					eventSystem::EventArg{eventSystem::getEventType("x"), {mouseX}},
+					eventSystem::EventArg{eventSystem::getEventType("y"), {mouseY}}
+				};
+				eventSystem::Event mouseEvent = {
+					eventSystem::getEventType("axisInput:turn"),
+					mouseEventArgs
+				};
+				eventManager->publish(mouseEvent);
+			}
+
 			default:
 				break;
 			}

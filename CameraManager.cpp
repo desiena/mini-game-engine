@@ -18,6 +18,7 @@ void CameraManager::registerSubscriptions(eventSystem::EventManager* em)
 	em->subscribe(this, "keyPressed:moveBack");
 	em->subscribe(this, "keyPressed:moveLeft");
 	em->subscribe(this, "keyPressed:moveRight");
+	em->subscribe(this, "axisInput:turn");
 }
 
 void CameraManager::setAspectRatio(float aspectRatio)
@@ -41,7 +42,7 @@ void CameraManager::handleEvent(eventSystem::Event event)
 		uint32_t objID = std::get<uint32_t>(objIDArg.value);
 		SceneObject obj = sceneManager->getObjectByID(objID);
 
-		mainCamera->view = obj.transform;
+		// ToDo: serialize srt representation.
 		mainCamera->proj = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 10.0f);
 
 		uint32_t argKey = eventSystem::getEventType("mainCamera");
@@ -81,6 +82,13 @@ void CameraManager::handleEvent(eventSystem::Event event)
 		mainCamera->moveRight(deltaTime);
 		break;
 	}
+	case eventSystem::getEventType("axisInput:turn"):
+	{
+		uint32_t x = std::get<uint32_t>(event.getArg("x").value);
+		uint32_t y = std::get<uint32_t>(event.getArg("y").value);
+		mainCamera->turn(x, y);
+		break;
+	}
 	default:
 		std::cerr << "unknown event heard by camera manager: " << event.type << std::endl;
 		break;
@@ -93,24 +101,41 @@ void Camera::update(float deltaTime)
 
 void Camera::moveForward(float deltaTime)
 {
-	glm::quat facing = glm::quat_cast(view);
-	view = glm::translate(view, glm::vec3(0, 0, deltaTime * 1.0f) * facing);
+	glm::quat facing = glm::quat_cast(rotation);
+	translation = glm::translate(translation, glm::vec3(0, 0, deltaTime * 1.0f) * facing);
+	updateView();
 }
 
 void Camera::moveBack(float deltaTime)
 {
-	glm::quat facing = glm::quat_cast(view);
-	view = glm::translate(view, glm::vec3(0, 0, -deltaTime * 1.0f) * facing);
+	glm::quat facing = glm::quat_cast(rotation);
+	translation = glm::translate(translation, glm::vec3(0, 0, -deltaTime * 1.0f) * facing);
+	updateView();
 }
 
 void Camera::moveLeft(float deltaTime)
 {
-	glm::quat facing = glm::quat_cast(view);
-	view = glm::translate(view, glm::vec3(deltaTime * 1.0f, 0, 0) * facing);
+	glm::quat facing = glm::quat_cast(rotation);
+	translation = glm::translate(translation, glm::vec3(deltaTime * 1.0f, 0, 0) * facing);
+	updateView();
 }
 
 void Camera::moveRight(float deltaTime)
 {
-	glm::quat facing = glm::quat_cast(view);
-	view = glm::translate(view, glm::vec3(-deltaTime * 1.0f, 0, 0) * facing);
+	glm::quat facing = glm::quat_cast(rotation);
+	translation = glm::translate(translation, glm::vec3(-deltaTime * 1.0f, 0, 0) * facing);
+	updateView();
+}
+
+void Camera::turn(int x, int y)
+{
+	glm::vec3 right = glm::vec3(1, 0, 0) * glm::quat_cast(rotation);
+	rotation = glm::rotate(rotation, glm::radians(y * 0.1f), right);
+	rotation = glm::rotate(rotation, glm::radians(x * 0.1f), glm::vec3(0.0f, 0.0f, 1.0f));
+	updateView();
+}
+
+void Camera::updateView()
+{
+	view = rotation * translation;
 }

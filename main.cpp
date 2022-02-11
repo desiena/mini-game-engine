@@ -33,11 +33,20 @@ int main()
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 	auto lastTime = startTime;
+	float measurementsPerSecond = 20;
+	int fps = 0;
 	while (!inputManager.shouldQuit())
 	{
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 		lastTime = currentTime;
+		fps++;
+		if (currentTime - startTime > std::chrono::milliseconds((long)(1000.f/measurementsPerSecond)))
+		{
+			std::cout << fps * measurementsPerSecond << std::endl;
+			fps = 0;
+			startTime = currentTime;
+		}
 		eventManager.publish({
 			eventSystem::getEventType("startFrame"),
 			{eventSystem::getEventType("deltaTime"), deltaTime}
