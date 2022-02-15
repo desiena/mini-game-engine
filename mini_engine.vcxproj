@@ -156,9 +156,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="TransformManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+    <None Include="scenes\scene.json" />
     <None Include="shaders\shader.frag" />
     <None Include="shaders\shader.vert" />
   </ItemGroup>
@@ -172,6 +174,10 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="TransformManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\viking_room.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

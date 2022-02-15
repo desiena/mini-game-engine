@@ -1,13 +1,12 @@
 [
   {
     "name": "vikingRoom1",
-    "transform": [
-      [ 1, 0, 0, 0 ],
-      [ 0, 1, 0, 0 ],
-      [ 0, 0, 1, 0 ],
-      [ 0, 1.2, 0.3, 1 ]
-    ],
     "componentData": {
+      "transform": {
+        "translation": [ 0, 1.2, 0.3 ],
+        "scale": [ 1, 1, 1 ],
+        "rotation": [ 0, 0, 0, 1 ]
+      },
       "renderable": {
         "modelPath": "models/viking_room.obj",
         "texturePath": "textures/viking_room.png"
@@ -16,13 +15,12 @@
   },
   {
     "name": "vikingRoom2",
-    "transform": [
-      [ 1, 0, 0, 0 ],
-      [ 0, 1, 0, 0 ],
-      [ 0, 0, 1, 0 ],
-      [ 0, 0, 0, 1 ]
-    ],
     "componentData": {
+      "transform": {
+        "translation": [ 0, 0, 0 ],
+        "scale": [ 1, 1, 1 ],
+        "rotation": [ 0, 0, 0, 1 ]
+      },
       "renderable": {
         "modelPath": "models/viking_room.obj",
         "texturePath": "textures/viking_room.png"
@@ -38,6 +36,11 @@
       [ 0, 0, -3.5, 1 ]
     ],
     "componentData": {
+      "transform": {
+        "translation": [ 0, 0, 0 ],
+        "scale": [ 1, 1, 1 ],
+        "rotation": [ 0, 0, 0, 1 ]
+      },
       "camera": {}
     }
   }

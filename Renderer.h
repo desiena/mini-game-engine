@@ -5,6 +5,7 @@
 #include "EventManager.h"
 #include "CameraManager.h"
 #include "SceneManager.h"
+#include "TransformManager.h"
 
 #include "VkBootstrap.h"
 
@@ -65,7 +66,7 @@ namespace std {
 
 struct Renderable
 {
-	glm::mat4 modelTransform;
+	Transform* modelTransform;
 
 	uint32_t mipLevels;
 	VkImage textureImage;
@@ -93,6 +94,7 @@ public:
 	Camera* mainCamera;
 	eventSystem::EventManager* eventManager;
 	SceneManager* sceneManager;
+	TransformManager* transformManager;
 
 	std::vector<Renderable*> renderables;
 
@@ -157,7 +159,7 @@ public:
 	int createTextureImage(Renderable* r, std::string texturePath);
 	int createTextureImageView(Renderable* r);
 	int createTextureSampler(Renderable* r);
-	int loadModel(std::string modelPath, std::string texturePath, glm::mat4 transform);
+	int loadModel(std::string modelPath, std::string texturePath, Transform* transform);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	int createVertexBuffer(Renderable* r);
 	int createIndexBuffer(Renderable* r);

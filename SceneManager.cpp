@@ -20,6 +20,20 @@ int SceneManager::init(eventSystem::EventManager* em)
         {
             for (auto& [key, value] : data.items())
             {
+                if (value.is_array())
+                {
+                    if (value.size() == 3)
+                    {
+                        auto arrVal = (std::array<float, 3>)value;
+                        so.sceneData[eventSystem::getEventType(component)][eventSystem::getEventType(key)] = arrVal;
+                    }
+                    else if (value.size() == 4)
+                    {
+                        auto arrVal = (std::array<float, 4>)value;
+                        so.sceneData[eventSystem::getEventType(component)][eventSystem::getEventType(key)] = arrVal;
+                    }
+                    continue;
+                }
                 so.sceneData[eventSystem::getEventType(component)][eventSystem::getEventType(key)] = value;
             }
         }
@@ -52,6 +66,7 @@ void SceneManager::handleEvent(eventSystem::Event event)
 
 glm::mat4 SceneManager::extractTransform(nlohmann::json obj)
 {
+    if (obj["transform"].is_null()) return glm::mat4(1.f);
     // ToDo: Move to srt representation for better readability.
     // ToDo: verify row major ordering
     glm::vec4 row0 = {
@@ -81,7 +96,10 @@ glm::mat4 SceneManager::extractTransform(nlohmann::json obj)
     return glm::mat4{row0, row1, row2, row3};
 }
 
-std::unordered_map<uint32_t, std::variant<bool, uint64_t, uint32_t, std::string, float>> SceneObject::getComponentData(std::string componentName)
+std::unordered_map<
+    uint32_t,
+    std::variant<bool, uint64_t, uint32_t, std::string, float, std::array<float, 3>, std::array<float, 4>>
+> SceneObject::getComponentData(std::string componentName)
 {
     return sceneData[eventSystem::getEventType(componentName)];
 }

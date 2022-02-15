@@ -16,6 +16,15 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{4f17dda9-3e34-4d03-ae60-04835c8551c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\textures">
+      <UniqueIdentifier>{288d8893-bc30-442c-822a-0c8bbf1af192}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\scenes">
+      <UniqueIdentifier>{cb701868-a720-45b0-87f5-fe7f9cf19512}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\models">
+      <UniqueIdentifier>{e4455c14-5bd5-4407-95b0-ff1277d5d4cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -39,6 +48,9 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TransformManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
@@ -47,6 +59,9 @@
     </None>
     <None Include="shaders\shader.vert">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="scenes\scene.json">
+      <Filter>Resource Files\scenes</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -71,5 +86,13 @@
     <ClInclude Include="InputManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TransformManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\viking_room.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

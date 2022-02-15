@@ -17,11 +17,15 @@ int main()
 	CameraManager cameraManager;
 	SceneManager sceneManager;
 	InputManager inputManager;
+	TransformManager transformManager;
 
 	// Todo: add system lookup via game manager to avoid this
 	renderer.sceneManager = &sceneManager;
+	renderer.transformManager = &transformManager;
 	cameraManager.sceneManager = &sceneManager;
+	transformManager.sceneManager = &sceneManager;
 
+	transformManager.registerSubscriptions(&eventManager);
 	renderer.registerSubscriptions(&eventManager);
 	cameraManager.registerSubscriptions(&eventManager);
 	inputManager.registerSubscriptions(&eventManager);

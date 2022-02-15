@@ -700,7 +700,7 @@ int Renderer::createTextureSampler(Renderable* r) {
 	return 0;
 }
 
-int Renderer::loadModel(std::string modelPath, std::string texturePath, glm::mat4 transform) {
+int Renderer::loadModel(std::string modelPath, std::string texturePath, Transform* transform) {
 
 	Renderable* r = new Renderable;
 	renderables.push_back(r);
@@ -1386,7 +1386,7 @@ void Renderer::updateUniformBuffer(float deltaTime, Renderable* r, uint32_t curr
 	//r->modelTransform = glm::rotate(glm::mat4(1.0f), deltaTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	UniformBufferObject ubo{};
-	ubo.model = r->modelTransform;
+	ubo.model = r->modelTransform->transform;
 	ubo.view = mainCamera->view;
 	ubo.proj = mainCamera->proj;
 	ubo.proj[1][1] *= -1;
@@ -1532,7 +1532,10 @@ void Renderer::handleEvent(eventSystem::Event event)
 		auto renderableData = obj.getComponentData("renderable");
 		std::string modelPath = std::get<std::string>(renderableData[eventSystem::getEventType("modelPath")]);
 		std::string texturePath = std::get<std::string>(renderableData[eventSystem::getEventType("texturePath")]);
-		loadModel(modelPath, texturePath, obj.transform);
+
+		Transform* transform = transformManager->getObjectByID(objID);
+
+		loadModel(modelPath, texturePath, transform);
 		updateCommandBuffers();
 		break;
 	}

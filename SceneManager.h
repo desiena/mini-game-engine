@@ -19,10 +19,16 @@ public:
 	glm::mat4 transform;
 	std::unordered_map<
 		uint32_t,
-		std::unordered_map<uint32_t, std::variant<bool, uint64_t, uint32_t, std::string, float>>
+		std::unordered_map<
+			uint32_t,
+			std::variant<bool, uint64_t, uint32_t, std::string, float, std::array<float, 3>, std::array<float, 4>>
+		>
 	> sceneData;
 
-	std::unordered_map<uint32_t, std::variant<bool, uint64_t, uint32_t, std::string, float>> getComponentData(std::string componentName);
+	std::unordered_map<
+		uint32_t,
+		std::variant<bool, uint64_t, uint32_t, std::string, float, std::array<float, 3>, std::array<float, 4>>
+	> getComponentData(std::string componentName);
 };
 
 class SceneManager : public eventSystem::Listener
