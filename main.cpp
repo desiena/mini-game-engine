@@ -35,6 +35,10 @@ int main()
 	if (sceneManager.init(&eventManager) == -1) return -1;
 	if (inputManager.init(&eventManager) == -1) return -1;
 
+	renderer.linkObjects();
+	//cameraManager.linkObjects();
+	//inputManager.linkObjects();
+
 	auto startTime = std::chrono::high_resolution_clock::now();
 	auto lastTime = startTime;
 	float measurementsPerSecond = 20;

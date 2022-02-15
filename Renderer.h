@@ -66,6 +66,8 @@ namespace std {
 
 struct Renderable
 {
+	uint32_t hashedName;
+
 	Transform* modelTransform;
 
 	uint32_t mipLevels;
@@ -159,7 +161,7 @@ public:
 	int createTextureImage(Renderable* r, std::string texturePath);
 	int createTextureImageView(Renderable* r);
 	int createTextureSampler(Renderable* r);
-	int loadModel(std::string modelPath, std::string texturePath, Transform* transform);
+	int loadModel(std::string modelPath, std::string texturePath, uint32_t hashedName);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	int createVertexBuffer(Renderable* r);
 	int createIndexBuffer(Renderable* r);
@@ -180,6 +182,7 @@ public:
 	int recreateSwapchain();
 	void updateUniformBuffer(float deltaTime, Renderable* r, uint32_t currentImage);
 	void registerSubscriptions(eventSystem::EventManager* em);
+	void linkObjects();
 public:
 	int init(eventSystem::EventManager* em);
 	virtual void handleEvent(eventSystem::Event event) override;

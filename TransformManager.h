@@ -30,5 +30,6 @@ public:
 private:
 	std::unordered_map<uint32_t, Transform*> transforms;
 	virtual void handleEvent(eventSystem::Event event) override;
+	void updateMatrix(Transform* transform);
 };
 

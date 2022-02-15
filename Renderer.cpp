@@ -700,14 +700,14 @@ int Renderer::createTextureSampler(Renderable* r) {
 	return 0;
 }
 
-int Renderer::loadModel(std::string modelPath, std::string texturePath, Transform* transform) {
+int Renderer::loadModel(std::string modelPath, std::string texturePath, uint32_t hashedName) {
 
 	Renderable* r = new Renderable;
 	renderables.push_back(r);
 	if (0 != createTextureImage(r, texturePath)) return -1;
 	if (0 != createTextureImageView(r)) return -1;
 	if (0 != createTextureSampler(r)) return -1;
-	r->modelTransform = transform;
+	r->hashedName = hashedName;
 
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
@@ -1533,14 +1533,20 @@ void Renderer::handleEvent(eventSystem::Event event)
 		std::string modelPath = std::get<std::string>(renderableData[eventSystem::getEventType("modelPath")]);
 		std::string texturePath = std::get<std::string>(renderableData[eventSystem::getEventType("texturePath")]);
 
-		Transform* transform = transformManager->getObjectByID(objID);
-
-		loadModel(modelPath, texturePath, transform);
+		loadModel(modelPath, texturePath, objID);
 		updateCommandBuffers();
 		break;
 	}
 	default:
 		std::cerr << "unknown event heard by Renderer: " << event.type << std::endl;
 		break;
+	}
+}
+
+void Renderer::linkObjects()
+{
+	for (Renderable* r : renderables)
+	{
+		r->modelTransform = transformManager->getObjectByID(r->hashedName);
 	}
 }
