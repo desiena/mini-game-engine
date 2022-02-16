@@ -60,8 +60,8 @@ void InputManager::handleEvent(eventSystem::Event event)
 
 			case SDL_MOUSEMOTION:
 			{
-				uint32_t mouseX = sdlEvent.motion.xrel;
-				uint32_t mouseY = sdlEvent.motion.yrel;
+				int mouseX = sdlEvent.motion.xrel;
+				int mouseY = sdlEvent.motion.yrel;
 				std::array<eventSystem::EventArg, 5> mouseEventArgs{
 					eventSystem::EventArg{eventSystem::getEventType("x"), {mouseX}},
 					eventSystem::EventArg{eventSystem::getEventType("y"), {mouseY}}

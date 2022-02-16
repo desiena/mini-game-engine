@@ -23,6 +23,7 @@ int main()
 	renderer.sceneManager = &sceneManager;
 	renderer.transformManager = &transformManager;
 	cameraManager.sceneManager = &sceneManager;
+	cameraManager.transformManager = &transformManager;
 	transformManager.sceneManager = &sceneManager;
 
 	transformManager.registerSubscriptions(&eventManager);
@@ -36,7 +37,7 @@ int main()
 	if (inputManager.init(&eventManager) == -1) return -1;
 
 	renderer.linkObjects();
-	//cameraManager.linkObjects();
+	cameraManager.linkObjects();
 	//inputManager.linkObjects();
 
 	auto startTime = std::chrono::high_resolution_clock::now();

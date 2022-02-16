@@ -27,9 +27,14 @@ public:
 	void registerSubscriptions(eventSystem::EventManager* em);
 	Transform* getObjectByID(uint32_t objID);
 	SceneManager* sceneManager;
+	void updateMatrix(Transform* transform);
+	void moveForward(Transform* transform, float distance);
+	void moveBack(Transform* transform, float distance);
+	void moveLeft(Transform* transform, float distance);
+	void moveRight(Transform* transform, float distance);
+	void turn(Transform* transform, float x, float y);
 private:
 	std::unordered_map<uint32_t, Transform*> transforms;
 	virtual void handleEvent(eventSystem::Event event) override;
-	void updateMatrix(Transform* transform);
 };
 

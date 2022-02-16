@@ -1,6 +1,7 @@
 #pragma once
 #include "EventManager.h"
 #include "SceneManager.h"
+#include "TransformManager.h"
 
 #include <vector>
 
@@ -13,36 +14,29 @@
 class Camera
 {
 public:
+	uint32_t hashedName;
+	Transform* transform;
+
 	glm::mat4 view;
 	glm::mat4 proj;
-
-	glm::mat4 rotation = glm::mat4(1.f);
-	glm::mat4 translation = glm::mat4(1.f);;
-
-	void update(float deltaTime);
-	void moveForward(float deltaTime);
-	void moveBack(float deltaTime);
-	void moveLeft(float deltaTime);
-	void moveRight(float deltaTime);
-	void turn(int x, int y);
-private:
-	void updateView();
 };
 
 class CameraManager : public eventSystem::Listener
 {
 public:
 	SceneManager* sceneManager;
+	TransformManager* transformManager;
 
 	int init(eventSystem::EventManager* em);
 	void registerSubscriptions(eventSystem::EventManager* em);
+	void linkObjects();
 	void setAspectRatio(float aspectRatio);
 private:
 	float aspectRatio;
 	Camera* mainCamera;
 	eventSystem::EventManager* em;
 
-
+	void updateView(Camera* camera);
 	virtual void handleEvent(eventSystem::Event event) override;
 };
 
