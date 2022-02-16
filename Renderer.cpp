@@ -1382,8 +1382,6 @@ int Renderer::recreateSwapchain() {
 }
 
 void Renderer::updateUniformBuffer(float deltaTime, Renderable* r, uint32_t currentImage) {
-	// ToDo: move model transform updates somewhere more appropriate.
-	//r->modelTransform = glm::rotate(glm::mat4(1.0f), deltaTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	UniformBufferObject ubo{};
 	ubo.model = r->modelTransform->transform;
@@ -1425,6 +1423,7 @@ int Renderer::drawFrame(float deltaTime) {
 		return -1;
 	}
 
+	CameraManager::updateView(mainCamera);
 	for (Renderable* r : renderables)
 	{
 		updateUniformBuffer(deltaTime, r, image_index);

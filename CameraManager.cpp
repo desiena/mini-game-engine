@@ -67,28 +67,24 @@ void CameraManager::handleEvent(eventSystem::Event event)
 	{
 		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
 		transformManager->moveForward(mainCamera->transform, deltaTime);
-		updateView(mainCamera);
 		break;
 	}
 	case eventSystem::getEventType("keyPressed:moveBack"):
 	{
 		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
 		transformManager->moveBack(mainCamera->transform, deltaTime);
-		updateView(mainCamera);
 		break;
 	}
 	case eventSystem::getEventType("keyPressed:moveLeft"):
 	{
 		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
 		transformManager->moveLeft(mainCamera->transform, deltaTime);
-		updateView(mainCamera);
 		break;
 	}
 	case eventSystem::getEventType("keyPressed:moveRight"):
 	{
 		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
 		transformManager->moveRight(mainCamera->transform, deltaTime);
-		updateView(mainCamera);
 		break;
 	}
 	case eventSystem::getEventType("axisInput:turn"):
@@ -96,7 +92,6 @@ void CameraManager::handleEvent(eventSystem::Event event)
 		int x = std::get<int>(event.getArg("x").value);
 		int y = std::get<int>(event.getArg("y").value);
 		transformManager->turn(mainCamera->transform, x, y);
-		updateView(mainCamera);
 		break;
 	}
 	default:

@@ -31,12 +31,12 @@ public:
 	void registerSubscriptions(eventSystem::EventManager* em);
 	void linkObjects();
 	void setAspectRatio(float aspectRatio);
+	static void updateView(Camera* camera);
 private:
 	float aspectRatio;
 	Camera* mainCamera;
 	eventSystem::EventManager* em;
 
-	void updateView(Camera* camera);
 	virtual void handleEvent(eventSystem::Event event) override;
 };
 
