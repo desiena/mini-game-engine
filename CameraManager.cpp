@@ -13,12 +13,6 @@ void CameraManager::registerSubscriptions(eventSystem::EventManager* em)
 {
 	em->subscribe(this, "swapchainCreated");
 	em->subscribe(this, "componentAdded:camera");
-	em->subscribe(this, "startFrame");
-	em->subscribe(this, "keyPressed:moveForward");
-	em->subscribe(this, "keyPressed:moveBack");
-	em->subscribe(this, "keyPressed:moveLeft");
-	em->subscribe(this, "keyPressed:moveRight");
-	em->subscribe(this, "axisInput:turn");
 }
 
 void CameraManager::linkObjects()
@@ -55,43 +49,6 @@ void CameraManager::handleEvent(eventSystem::Event event)
 		em->publish({
 			eventSystem::getEventType("mainCameraSet"), {argKey, {mainCamera}}
 			});
-		break;
-	}
-	case eventSystem::getEventType("startFrame"):
-	{
-		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
-		break;
-	}
-	// ToDo: move to a controller.
-	case eventSystem::getEventType("keyPressed:moveForward"):
-	{
-		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
-		transformManager->moveForward(mainCamera->transform, deltaTime);
-		break;
-	}
-	case eventSystem::getEventType("keyPressed:moveBack"):
-	{
-		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
-		transformManager->moveBack(mainCamera->transform, deltaTime);
-		break;
-	}
-	case eventSystem::getEventType("keyPressed:moveLeft"):
-	{
-		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
-		transformManager->moveLeft(mainCamera->transform, deltaTime);
-		break;
-	}
-	case eventSystem::getEventType("keyPressed:moveRight"):
-	{
-		float deltaTime = std::get<float>(event.getArg("deltaTime").value);
-		transformManager->moveRight(mainCamera->transform, deltaTime);
-		break;
-	}
-	case eventSystem::getEventType("axisInput:turn"):
-	{
-		int x = std::get<int>(event.getArg("x").value);
-		int y = std::get<int>(event.getArg("y").value);
-		transformManager->turn(mainCamera->transform, x, y);
 		break;
 	}
 	default:

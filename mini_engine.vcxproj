@@ -152,8 +152,10 @@
     <ClCompile Include="..\..\Libraries\vkbootstrap\VkBootstrap.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="EventManager.cpp" />
+    <ClCompile Include="FlythroughPlayerController.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MiscComponentManager.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="TransformManager.cpp" />
@@ -171,7 +173,9 @@
     <ClInclude Include="..\..\Libraries\vma\vk_mem_alloc.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="EventManager.h" />
+    <ClInclude Include="FlythroughPlayerController.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="MiscComponentManager.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="TransformManager.h" />

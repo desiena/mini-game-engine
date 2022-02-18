@@ -2,6 +2,7 @@
 #include "EventManager.h"
 #include "SceneManager.h"
 #include "InputManager.h"
+#include "MiscComponentManager.h"
 
 #include <iostream>
 #include <chrono>
@@ -18,6 +19,7 @@ int main()
 	SceneManager sceneManager;
 	InputManager inputManager;
 	TransformManager transformManager;
+	MiscComponentManager miscComponentManager;
 
 	// Todo: add system lookup via game manager to avoid this
 	renderer.sceneManager = &sceneManager;
@@ -25,11 +27,14 @@ int main()
 	cameraManager.sceneManager = &sceneManager;
 	cameraManager.transformManager = &transformManager;
 	transformManager.sceneManager = &sceneManager;
+	miscComponentManager.eventManager = &eventManager;
+	miscComponentManager.transformManager = &transformManager;
 
 	transformManager.registerSubscriptions(&eventManager);
 	renderer.registerSubscriptions(&eventManager);
 	cameraManager.registerSubscriptions(&eventManager);
 	inputManager.registerSubscriptions(&eventManager);
+	miscComponentManager.registerSubscriptions(&eventManager);
 
 	if (cameraManager.init(&eventManager) == -1) return -1;
 	if (renderer.init(&eventManager) == -1) return -1;
@@ -38,7 +43,7 @@ int main()
 
 	renderer.linkObjects();
 	cameraManager.linkObjects();
-	//inputManager.linkObjects();
+	miscComponentManager.linkObjects();
 
 	auto startTime = std::chrono::high_resolution_clock::now();
 	auto lastTime = startTime;

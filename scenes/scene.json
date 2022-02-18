@@ -35,7 +35,8 @@
         "scale": [ 1, 1, 1 ],
         "rotation": [ -0.395446599, -0.545398593, -0.598355353, -0.433800191 ]
       },
-      "camera": {}
+      "camera": {},
+      "flythroughPlayerController": {}
     }
   }
 ]
